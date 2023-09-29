@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Price Comparison</title>
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/boost.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+</head>
+<body>
+<h1>Price Comparison</h1>
+<h2 id="loader"></h2>
+<div id="chart-container-price-usdc"></div>
+
+<script>
+  // const baseUrl = 'http://34.116.167.180:3000'
+  // const baseUrl = 'http://35.192.203.79:3000'
+  // const baseUrl = 'http://34.72.156.122:3000'
+  // const baseUrl = 'http://34.118.3.61:3000'
+  const baseUrl = 'http://localhost:3000'
+  const loader = document.getElementById('loader');
+
+  const init = async () => {
+    loader.innerHTML = 'Loading...';
+    const ETHPricesRaw = await fetch(`${baseUrl}/api/prices/ETH`);
+    const ETHPrices = await ETHPricesRaw.json()
+
+    const PolygonPricesRaw = await fetch(`${baseUrl}/api/prices/Polygon`);
+    const PolygonPrices = await PolygonPricesRaw.json()
+
+    const ArbitrumPricesRaw = await fetch(`${baseUrl}/api/prices/Arbitrum`);
+    const ArbitrumPrices = await ArbitrumPricesRaw.json()
+
+    const BasePricesRaw = await fetch(`${baseUrl}/api/prices/Base`);
+    const BasePrices = await BasePricesRaw.json()
+
+    const ETHPriceObjects = Object.values(ETHPrices);
+    const PolygonPriceObjects = Object.values(PolygonPrices);
+    const ArbitrumPriceObjects = Object.values(ArbitrumPrices);
+    const BasePriceObjects = Object.values(BasePrices);
+
+    loader.innerHTML = 'Calculating...';
+    // Parse the JSON data as an object and convert it to an array
+
+    const USDC_ETH_005PricesETH = {
+      name: "ETH Uniswap V3 USDC/ETH 0.05%",
+      color: 'blue',
+      lineWidth: 2,
+      marker: {
+        enabled: true,
+      },
+      data: []
+    };
+    const USDC_ETH_005PricesPolygon = {
+      name: "Polygon Uniswap V3 USDC/ETH 0.05%",
+      color: 'purple',
+      lineWidth: 2,
+      marker: {
+        enabled: true,
+      },
+      data: []
+    };
+    const ETH_USDC_005PricesArbitrum = {
+      name: "Arbitrum Uniswap V3 ETH/USDC 0.05%",
+      color: 'orange',
+      lineWidth: 2,
+      marker: {
+        enabled: true,
+      },
+      data: []
+    };
+    const ETH_USDC_005PricesBase = {
+      name: "Base Uniswap V3 ETH/USDC 0.05%",
+      color: 'red',
+      lineWidth: 2,
+      marker: {
+        enabled: true,
+      },
+      data: []
+    };
+
+    ETHPriceObjects.forEach((priceObject) => {
+      const price = parseFloat(String(priceObject.price));
+      USDC_ETH_005PricesETH.data.push([priceObject.timestamp*1000, price])
+    });
+
+    PolygonPriceObjects.forEach((priceObject) => {
+      const price = parseFloat(String(priceObject.price));
+      USDC_ETH_005PricesPolygon.data.push([priceObject.timestamp*1000, price])
+    });
+
+    ArbitrumPriceObjects.forEach((priceObject) => {
+      const price = parseFloat(String(priceObject.price));
+      ETH_USDC_005PricesArbitrum.data.push([priceObject.timestamp*1000, price])
+    });
+
+    BasePriceObjects.forEach((priceObject) => {
+      const price = parseFloat(String(priceObject.price));
+      ETH_USDC_005PricesBase.data.push([priceObject.timestamp*1000, price])
+
+    });
+
+    Highcharts.chart('chart-container-price-usdc', {
+      chart: {
+        zoomType: 'x',
+        height: 800,
+      },
+      title: {
+        text: 'Uniswap and Binance price ETH in USDT',
+        margin: 50,
+        useHTML: true,
+      },
+      accessibility: {
+        screenReaderSection: {
+          beforeChartFormat: '<{headingTagName}>{chartTitle}</{headingTagName}><div>{chartSubtitle}</div><div>{chartLongdesc}</div><div>{xAxisDescription}</div><div>{yAxisDescription}</div>'
+        }
+      },
+      xAxis: {
+        type: 'datetime'
+      },
+      yAxis: {
+        title: {
+          text: 'Price',
+        }
+      },
+      tooltip: {
+        formatter: function() {
+          let s = `<b>${Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x)}</b>`;
+          this.points.forEach((point) => {
+            s += `<br/><span style="color:${point.color}">${point.series.name}: ${point.y}</span>`;
+          });
+          return s;
+        },
+        shared: true
+      },
+      series: [USDC_ETH_005PricesETH, USDC_ETH_005PricesPolygon, ETH_USDC_005PricesArbitrum, ETH_USDC_005PricesBase],
+      legend: {
+        layout: 'horizontal',
+        align: 'left',
+        verticalAlign: 'top'
+      },
+    });
+
+    loader.innerHTML = '';
+  }
+
+  init().catch((err) => {
+    console.error(err);
+    loader.innerHTML = 'Error';
+  });
+</script>
+</body>
+</html>

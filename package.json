@@ -1,0 +1,14 @@
+{
+  "name": "comparer",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "ethers": "^5.5.1",
+    "express": "^4.18.2"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
